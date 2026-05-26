@@ -1,6 +1,6 @@
 # YouTube Studio Salad LTX Runtime
 
-Public runtime image for Salad LTX probes.
+Public runtime image for Salad LTX probes built through GitHub Actions.
 
 This image intentionally includes only the software layer:
 
