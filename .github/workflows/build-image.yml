@@ -17,8 +17,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Download source
+        run: |
+          curl -fsSL "https://github.com/${{ github.repository }}/archive/${{ github.sha }}.tar.gz" -o source.tar.gz
+          tar -xzf source.tar.gz --strip-components=1
+          test -f Dockerfile
 
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
