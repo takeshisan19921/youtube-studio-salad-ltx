@@ -1,0 +1,44 @@
+name: Build Theta Chatterbox Turbo SSH Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: GHCR tag to publish
+        required: true
+        default: theta-chatterbox-turbo-017-cu124
+  push:
+    branches:
+      - main
+    paths:
+      - theta-chatterbox-turbo-ssh/**
+      - .github/workflows/build-theta-chatterbox-turbo.yml
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/youtube-studio-salad-ltx
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download source
+        run: |
+          curl -fsSL "https://github.com/${{ github.repository }}/archive/${{ github.sha }}.tar.gz" -o source.tar.gz
+          tar -xzf source.tar.gz --strip-components=1
+          test -f theta-chatterbox-turbo-ssh/Dockerfile
+          test -f theta-chatterbox-turbo-ssh/entrypoint.sh
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build and push
+        run: |
+          TAG="${{ github.event.inputs.tag || 'theta-chatterbox-turbo-017-cu124' }}"
+          docker buildx version
+          docker buildx create --name theta-chatterbox-builder --use || docker buildx use theta-chatterbox-builder
+          docker buildx inspect --bootstrap
+          docker buildx build             --platform linux/amd64             --push             --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}"             --label "org.opencontainers.image.description=Theta EdgeCloud Chatterbox Turbo CUDA SSH image. No secrets or generated media."             -t "${IMAGE_NAME}:${TAG}"             -f theta-chatterbox-turbo-ssh/Dockerfile             theta-chatterbox-turbo-ssh

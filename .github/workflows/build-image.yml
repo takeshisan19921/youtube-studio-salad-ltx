@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - Dockerfile
+      - .dockerignore
   workflow_dispatch:
 
 permissions:
@@ -31,11 +34,4 @@ jobs:
           docker buildx version
           docker buildx create --name salad-builder --use || docker buildx use salad-builder
           docker buildx inspect --bootstrap
-          docker buildx build \
-            --platform linux/amd64 \
-            --push \
-            --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
-            --label "org.opencontainers.image.description=Salad runtime image for YouTube Studio LTX probes. No model weights." \
-            -t "${IMAGE_NAME}:cu124-v1" \
-            -t "${IMAGE_NAME}:latest" \
-            .
+          docker buildx build             --platform linux/amd64             --push             --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}"             --label "org.opencontainers.image.description=Salad runtime image for YouTube Studio LTX probes. No model weights."             -t "${IMAGE_NAME}:cu124-v1"             -t "${IMAGE_NAME}:latest"             .
